@@ -1,0 +1,18 @@
+WASB_ROOT: /home/gossard/Git/blurball
+defaults:
+        - _self_
+        - runner: inference
+        - model: ballseg
+        - dataloader: default
+        - detector: tracknetv2
+        - transform: default
+        - tracker: intra_frame_peak
+detector:
+  postprocessor:
+    use_hm_weight: False
+  step: 1
+hydra:
+  run:
+    dir: ${WASB_ROOT}/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+output_dir:
+seed: 1234

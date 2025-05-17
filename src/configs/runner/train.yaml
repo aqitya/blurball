@@ -1,0 +1,27 @@
+name: train
+device: cuda
+gpus: [0]
+max_epochs: 30
+vis_result: False
+vis_hm: False
+vis_traj: False
+find_fp1_epochs: [20, 21, 22,23,24,25,26,27,28,29,30]
+best_model_name: best_model
+model_path: 
+split: test
+fp1_filename:  dummy
+test:
+  run: True
+  epoch_start: 0
+  epoch_step: 1
+  run_before_train: False
+  run_after_train_with_best: False
+inference_video:
+  run: True
+  epoch_start: 0
+  epoch_step: 1
+  run_before_train: False
+  run_after_train_with_best: False
+eval:
+  score_threshold: 0.5
+  dist_threshold: 4

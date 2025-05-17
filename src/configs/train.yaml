@@ -1,0 +1,25 @@
+WASB_ROOT: /home/gossard/Git/blurball
+defaults:
+        - _self_
+        - runner: train
+        - dataset: tabletennis
+        - model: wasb
+        - dataloader: default
+        - detector: tracknetv2
+        - transform: default
+        - tracker: online
+hydra:
+  run:
+    dir: ${WASB_ROOT}/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+output_dir:
+seed: 1234
+optimizer:
+  name: adam
+  learning_rate: 0.0003
+  weight_decay: 0
+  scheduler: 
+    name: constant
+    factor: 1
+loss: 
+  name:  heatmap
+  sub_name: mse
