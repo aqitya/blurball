@@ -6,6 +6,8 @@ __factory = {
     "tracknetv2": TracknetV2Detector,
     "deepball": DeepBallDetector,
     "blurball": BlurBallDetector,
+    "blurball_se": BlurBallDetector,
+    "blurball_eca": BlurBallDetector,
 }
 
 

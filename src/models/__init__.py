@@ -6,6 +6,8 @@ from .hrnet import HRNet
 from .deepball import DeepBall
 from .ballseg import BallSeg
 from .blurball import BlurBall
+from .blurball_se import BlurBall_SE
+from .blurball_eca import BlurBall_ECA
 
 __factory = {
     "tracknetv2": TrackNetV2,
@@ -15,6 +17,8 @@ __factory = {
     "deepball": DeepBall,
     "ballseg": BallSeg,
     "blurball": BlurBall,
+    "blurball_se": BlurBall_SE,
+    "blurball_eca": BlurBall_ECA,
 }
 
 
@@ -39,6 +43,8 @@ def build_model(cfg):
         or model_name == "cls_hrnet"
         or model_name == "hrnet"
         or model_name == "blurball"
+        or model_name == "blurball_se"
+        or model_name == "blurball_eca"
     ):
         model = __factory[model_name](cfg["model"])
     elif model_name == "restracknetv2":

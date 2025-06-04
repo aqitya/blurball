@@ -12,33 +12,25 @@ from datasets import select_dataset
 
 
 def build_img_transforms(cfg):
-    transform_train = T.Compose(
-        [
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
-    transform_test = T.Compose(
-        [
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
+    transform_train = T.Compose([
+        T.ToTensor(),
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    transform_test = T.Compose([
+        T.ToTensor(),
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
     return transform_train, transform_test
 
 
 def build_seq_transforms(cfg):
-    transform_train = ST.SeqTransformCompose(
-        [
-            ST.RandomHorizontalFlipping(
-                cfg["transform"]["train"]["horizontal_flip"]["p"]
-            ),
-            ST.RandomCropping(
-                p=cfg["transform"]["train"]["crop"]["p"],
-                max_rescale=cfg["transform"]["train"]["crop"]["max_rescale"],
-            ),
-        ]
-    )
+    transform_train = ST.SeqTransformCompose([
+        ST.RandomHorizontalFlipping(cfg["transform"]["train"]["horizontal_flip"]["p"]),
+        ST.RandomCropping(
+            p=cfg["transform"]["train"]["crop"]["p"],
+            max_rescale=cfg["transform"]["train"]["crop"]["max_rescale"],
+        ),
+    ])
     transform_test = None
     return transform_train, transform_test
 
@@ -75,6 +67,8 @@ def build_dataloader(
         "tracknetv2",
         "hrnet",
         "blurball",
+        "blurball_eca",
+        "blurball_se",
         "monotrack",
         "restracknetv2",
         "deepball",

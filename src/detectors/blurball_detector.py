@@ -23,6 +23,8 @@ class BlurBallDetector(object):
         "tracknetv2": TracknetV2Postprocessor,
         "deepball": DeepBallPostprocessor,
         "blurball": BlurBallPostprocessor,
+        "blurball_se": BlurBallPostprocessor,
+        "blurball_eca": BlurBallPostprocessor,
     }
 
     def __init__(self, cfg, model=None):
@@ -42,6 +44,8 @@ class BlurBallDetector(object):
             "deepball",
             "ballseg",
             "blurball",
+            "blurball_se",
+            "blurball_eca",
         ]:
             pass
         else:
@@ -69,7 +73,7 @@ class BlurBallDetector(object):
                 )
                 if not osp.exists(model_path):
                     FileNotFoundError("{} not found".format(model_path))
-            checkpoint = torch.load(model_path)
+            checkpoint = torch.load(model_path, map_location="cuda:0")
             self._model.load_state_dict(checkpoint["model_state_dict"])
             self._model = self._model.to(self._device)
             self._model = nn.DataParallel(self._model, device_ids=self._gpus)
@@ -114,15 +118,13 @@ class BlurBallDetector(object):
                     angles = pp_results[bid][eid][scale]["angles"]
                     lengths = pp_results[bid][eid][scale]["lengths"]
                     for xy, angle, length, score in zip(xys, angles, lengths, scores):
-                        results[bid][eid].append(
-                            {
-                                "xy": xy,
-                                "angle": angle,
-                                "length": length,
-                                "score": score,
-                                "scale": scale,
-                            }
-                        )
+                        results[bid][eid].append({
+                            "xy": xy,
+                            "angle": angle,
+                            "length": length,
+                            "score": score,
+                            "scale": scale,
+                        })
 
                     hm = pp_results[bid][eid][scale]["hm"]
                     trans = pp_results[bid][eid][scale]["trans"]
