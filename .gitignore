@@ -164,6 +164,8 @@ cython_debug/
 # Custom
 .vscode/
 datasets/*
+datasets/blurball_dataset/
 outputs
+outputs/main/
 wandb/
 weights/

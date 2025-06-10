@@ -59,10 +59,9 @@ class Trainer(BaseRunner):
         set_seed(seed)
 
         self._device = cfg["runner"]["device"]
-        if self._device != "cuda":
-            assert 0, "device=cpu not supported"
-        if not torch.cuda.is_available():
-            assert 0, "GPU NOT available"
+        if self._device == "cuda" and not torch.cuda.is_available():
+            print("WARNING: GPU requested but not available, falling back to CPU")
+            self._device = "cpu"
         self._gpus = self._cfg["runner"]["gpus"]
 
         self._max_epoch = cfg["runner"]["max_epochs"]
@@ -161,8 +160,8 @@ class Trainer(BaseRunner):
         if self._inference_video_before_train:
             self._vi_runner.run(model=self._model)
 
-        best_loss = np.Inf
-        best_f1acc = -np.Inf
+        best_loss = np.inf
+        best_f1acc = -np.inf
         # is_best    = False
         for epoch in range(self._max_epoch):
             log.info(

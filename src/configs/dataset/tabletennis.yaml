@@ -1,5 +1,5 @@
 name: tabletennis
-root_dir: /data/online_tt_dataset/matches
+root_dir: /Users/aditummala/Documents/GitHub/blurball/src/datasets/blurball_dataset
 video_dirname: rallies_videos
 frame_dirname: frames
 csv_dirname: csv

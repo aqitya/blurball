@@ -13,6 +13,7 @@ import torch
 from torch import nn
 import cv2
 import matplotlib.pyplot as plt
+from utils.vis import draw_frame
 
 from dataloaders import build_dataloader
 from detectors import build_detector
@@ -211,10 +212,11 @@ def inference_video(
                 int(cm_gt(cnt)[1] * 255),
                 int(cm_gt(cnt)[0] * 255),
             )
-            vis = visualizer.draw_frame(
+            # Use draw_frame function directly instead of visualizer.draw_frame
+            vis = draw_frame(
                 vis,
-                center_gt=center_gt,
-                color_gt=color_gt,
+                center=center_gt,
+                color=color_gt
             )
 
     # if vis_frame_dir is not None:
@@ -268,8 +270,19 @@ class BlurVideosInferenceRunner(BaseRunner):
         t_elapsed_all = 0.0
         num_frames_all = 0
         fp1_im_list_dict = {}
+        
+        # Filter for specific matches and clips if specified in config
+        eval_clips = self._cfg.get('runner', {}).get('eval_clips', None)
+        eval_match = self._cfg.get('runner', {}).get('eval_match', None)
+        
         for key, dataloader_and_gt in self._clip_loaders_and_gts.items():
             match, clip_name = key
+            
+            # Skip this clip if it doesn't match specified match and clip
+            if (eval_match and match != eval_match) or (eval_clips and clip_name not in eval_clips):
+                log.info(f"Skipping match={match}, clip={clip_name} (not in filter criteria)")
+                continue
+                
             dataloader = dataloader_and_gt["clip_loader"]
             gt_dict = dataloader_and_gt["clip_gt"]
 

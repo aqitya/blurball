@@ -1,0 +1,18 @@
+WASB_ROOT: /Users/aditummala/Documents/GitHub/blurball
+defaults:
+  - _self_
+  - runner: eval_blurball
+  - dataset: tabletennis
+  - model: blurball
+  - dataloader: line
+  - detector: blurball
+  - transform: default
+  - tracker: online_blur
+hydra:
+  run:
+    dir: ${WASB_ROOT}/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+output_dir:
+seed: 1234
+
+# Point to your best model weights
+model_path: ${WASB_ROOT}/blurball_best  # Try using the alternative best model file

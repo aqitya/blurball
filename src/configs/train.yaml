@@ -1,4 +1,4 @@
-WASB_ROOT: /home/gossard/Git/blurball
+WASB_ROOT: /Users/aditummala/Documents/GitHub/blurball
 defaults:
         - _self_
         - runner: train

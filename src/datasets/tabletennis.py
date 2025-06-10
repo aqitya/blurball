@@ -260,25 +260,52 @@ class TableTennis(object):
         disps = []
         for match in matches:
             match_clip_dir = osp.join(self._root_dir, match, self._frame_dirname)
-            clip_names = os.listdir(match_clip_dir)
-            clip_names.sort()
+            try:
+                clip_names = os.listdir(match_clip_dir)
+                clip_names = [c for c in clip_names if not c.startswith('.')]
+                clip_names.sort()
+            except (FileNotFoundError, NotADirectoryError):
+                print(f"Skipping match {match} - frame directory not found or not accessible")
+                continue
+                
             # cf. https://nol.cs.nctu.edu.tw:234/open-source/TrackNetv2/blob/master/3_in_1_out/gen_data_rally.py#L47
             clip_names = clip_names[: int(len(clip_names) * num_clip_ratio)]
             num_rallies += len(clip_names)
+            
             for clip_name in clip_names:
                 clip_seq_list = []
                 clip_seq_gt_dict = {}
+                
                 clip_frame_dir = osp.join(
                     self._root_dir, match, self._frame_dirname, clip_name
                 )
+                
+                # Try to find the corresponding CSV file
                 clip_csv_path = osp.join(
-                    self._root_dir, match, self._csv_dirname, "{}.csv".format(clip_name)
+                    self._root_dir, match, self._csv_dirname, f"{clip_name}.csv"
                 )
-                ball_xyvs = load_csv(clip_csv_path, frame_dir=clip_frame_dir)
-                frame_names = os.listdir(clip_frame_dir)
-                frame_names.sort()
+                
+                try:
+                    ball_xyvs = load_csv(clip_csv_path, frame_dir=clip_frame_dir)
+                except FileNotFoundError:
+                    print(f"Skipping clip {clip_name} in match {match} - CSV file not found")
+                    continue
+                    
+                try:
+                    frame_names = os.listdir(clip_frame_dir)
+                    frame_names = [f for f in frame_names if not f.startswith('.')]
+                    frame_names.sort()
+                except (FileNotFoundError, NotADirectoryError):
+                    print(f"Skipping clip {clip_name} in match {match} - frame directory not found or not accessible")
+                    continue
+                    
                 num_frames += len(frame_names)
                 num_frames_with_gt += len(ball_xyvs)
+                
+                if len(ball_xyvs) < self._frames_in:
+                    print(f"Skipping clip {clip_name} in match {match} - not enough frames with annotations")
+                    continue
+                    
                 for i in range(len(ball_xyvs) - self._frames_in + 1):
                     names = frame_names[i : i + self._frames_in]
                     paths = [osp.join(clip_frame_dir, name) for name in names]
@@ -305,6 +332,7 @@ class TableTennis(object):
                                 "clip": clip_name,
                             }
                         )
+                        
                 clip_seq_list_dict[(match, clip_name)] = clip_seq_list
 
                 # compute disp between consecutive frames
@@ -324,8 +352,10 @@ class TableTennis(object):
                         clip_disps.append(disp)
 
                 for i in range(len(ball_xyvs)):
-                    path = osp.join(clip_frame_dir, frame_names[i])
-                    clip_seq_gt_dict[path] = ball_xyvs[i]["center"]
+                    if i < len(frame_names):  # Make sure we don't go out of bounds
+                        path = osp.join(clip_frame_dir, frame_names[i])
+                        clip_seq_gt_dict[path] = ball_xyvs[i]["center"]
+                        
                 clip_seq_gt_dict_dict[(match, clip_name)] = clip_seq_gt_dict
                 clip_seq_disps[(match, clip_name)] = clip_disps
 

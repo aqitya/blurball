@@ -54,15 +54,14 @@ class BlurBallDetector(object):
         _, self._transform = build_img_transforms(cfg)
 
         self._device = cfg["runner"]["device"]
-        if self._device != "cuda":
-            assert 0, "device=cpu not supported"
-        if not torch.cuda.is_available():
-            assert 0, "GPU NOT available"
+        if self._device == "cuda" and not torch.cuda.is_available():
+            print("WARNING: CUDA requested but not available, falling back to CPU")
+            self._device = "cpu"
         self._gpus = cfg["runner"]["gpus"]
 
         if model is None:
             self._model = build_model(cfg)
-            model_path = cfg["detector"]["model_path"]
+            model_path = cfg["model_path"] if "model_path" in cfg else cfg["detector"].get("model_path")
             if model_path is None:
                 output_dir = HydraConfig.get().run.dir
                 model_path = osp.join(output_dir, "best_model.pth.tar")
@@ -71,10 +70,23 @@ class BlurBallDetector(object):
                         output_dir
                     )
                 )
-                if not osp.exists(model_path):
-                    FileNotFoundError("{} not found".format(model_path))
-            checkpoint = torch.load(model_path, map_location="cuda:0")
-            self._model.load_state_dict(checkpoint["model_state_dict"])
+            log.info(f"Loading model from {model_path}")
+            if not osp.exists(model_path):
+                raise FileNotFoundError(f"Model file not found: {model_path}")
+                
+            # Map to the appropriate device
+            map_location = f"cuda:{self._gpus[0]}" if self._device == "cuda" else "cpu"
+            checkpoint = torch.load(model_path, map_location=map_location)
+            
+            # Try to load state dict, handling potential mismatches
+            try:
+                self._model.load_state_dict(checkpoint["model_state_dict"])
+                log.info("Model loaded successfully")
+            except RuntimeError as e:
+                log.warning(f"Error loading state dict: {e}")
+                log.info("Attempting to load with strict=False...")
+                self._model.load_state_dict(checkpoint["model_state_dict"], strict=False)
+                log.info("Model loaded with some keys missing or unexpected")
             self._model = self._model.to(self._device)
             self._model = nn.DataParallel(self._model, device_ids=self._gpus)
         else:

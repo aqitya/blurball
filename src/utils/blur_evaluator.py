@@ -164,35 +164,35 @@ class BlurEvaluator(object):
 
     @property
     def rmse(self):
-        _rmse = -np.Inf
+        _rmse = -np.inf
         if len(self.sq_errs) > 0:
             _rmse = np.sqrt(np.array(self.sq_errs).mean())
         return _rmse
 
     @property
     def l_mae(self):
-        _mae = -np.Inf
+        _mae = -np.inf
         if len(self._l_aes) > 0:
             _mae = np.mean(np.array(self._l_aes))
         return _mae
 
     @property
     def l_std(self):
-        _std = -np.Inf
+        _std = -np.inf
         if len(self._l_aes) > 0:
             _std = np.std(np.array(self._l_aes))
         return _std
 
     @property
     def angle_mae(self):
-        _mae = -np.Inf
+        _mae = -np.inf
         if len(self._angle_aes) > 0:
             _mae = np.mean(np.array(self._angle_aes))
         return _mae
 
     @property
     def angle_std(self):
-        _std = -np.Inf
+        _std = -np.inf
         if len(self._l_aes) > 0:
             _std = np.std(np.array(self._angle_aes))
         return _std
